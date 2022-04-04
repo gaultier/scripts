@@ -22,13 +22,15 @@
 
 (def channel (async/chan 100000))
 (prn "Start")
-(async/go (time (git-update channel "/Users/pgaultier/projects/ppro-1648791067")))
+(async/go (time (git-update channel "/Users/pgaultier/projects/ppro-1648791067/")))
 (prn "End")
 
 (loop [x (async/<!! channel)]
   (when x
-    (println x))
-  (recur (async/<!! channel)))
+    (do 
+      (println x)
+      (recur (async/<!! channel)))))
+   
 (prn "End end")
 
 ; (async/go-loop [x (async/<! channel)]
