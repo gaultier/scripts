@@ -21,19 +21,10 @@
   (async/close! channel))
 
 (def channel (async/chan 100000))
-(prn "Start")
-(async/go (time (git-update channel "/Users/pgaultier/projects/ppro-1648791067/")))
-(prn "End")
+(async/go (git-update channel "/Users/pgaultier/projects/ppro-1648791067/"))
 
-(loop [x (async/<!! channel)]
-  (when x
-    (do 
-      (println x)
-      (recur (async/<!! channel)))))
-   
-(prn "End end")
-
-; (async/go-loop [x (async/<! channel)]
-;          (when x            ;; abort when channel is closed (nil? (<! c))
-;            (prn x)
-;            (recur (async/<! channel))))
+(time (loop [x (async/<!! channel)]
+        (when x
+          (do 
+            (println x)
+            (recur (async/<!! channel))))))
