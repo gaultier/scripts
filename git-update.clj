@@ -41,7 +41,10 @@
                                 (println (format "❌ %s" path))
                                 shasPerPath)
                       :succeeded (do 
-                                   (println (format "✓ %s\t%s -> %s" path (get-in shasPerPath [path :before]) info))
+                                   (let [shaBefore (get-in shasPerPath [path :before])]
+                                     (if (= shaBefore info)
+                                       (println (format "✓ %s" path))
+                                       (println (format "✓ %s\t%s -> %s" path shaBefore info))))
                                    (assoc-in shasPerPath [path :after] info))
                       nil)]
               (recur (async/<!! channel) shasPerPath))))))
