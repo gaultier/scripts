@@ -30,21 +30,20 @@
 (time (loop [x (async/<!! channel)
              shasPerPath {}]
         (when x
-          (do 
-            (let [[status path info] x
-                  shasPerPath
-                    (case status
-                      :pulling (do 
-                                 (println (format "⏳ Fetching\t%s\t%s" path info))
-                                 (assoc-in shasPerPath [path :before] info))
-                      :failed (do 
-                                (println (format "❌ %s" path))
-                                shasPerPath)
-                      :succeeded (do 
-                                   (let [shaBefore (get-in shasPerPath [path :before])]
-                                     (if (= shaBefore info)
-                                       (println (format "✓ %s" path))
-                                       (println (format "✓ %s\t%s -> %s" path shaBefore info))))
-                                   (assoc-in shasPerPath [path :after] info))
-                      nil)]
-              (recur (async/<!! channel) shasPerPath))))))
+          (let [[status path info] x
+                shasPerPath
+                  (case status
+                    :pulling (do 
+                               (println (format "⏳ Fetching\t%s\t%s" path info))
+                               (assoc-in shasPerPath [path :before] info))
+                    :failed (do 
+                              (println (format "❌ %s" path))
+                              shasPerPath)
+                    :succeeded (do 
+                                 (let [shaBefore (get-in shasPerPath [path :before])]
+                                   (if (= shaBefore info)
+                                     (println (format "✓ %s" path))
+                                     (println (format "✓ %s\t%s -> %s" path shaBefore info))))
+                                 (assoc-in shasPerPath [path :after] info))
+                    nil)]
+            (recur (async/<!! channel) shasPerPath)))))
