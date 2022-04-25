@@ -30,4 +30,3 @@
 (loop [[_ words] :pairs (get-anagrams words)
                  :when (> (length words) 1)]
   (pp words))
-
