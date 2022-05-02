@@ -35,12 +35,12 @@ print_anagrams :: proc(words: []string) {
   anagrams := collect_anagrams(words)
 
   for k, a in anagrams {
-    if len(a) > 1 {
-      for i in a {
-        fmt.printf("%s ", words[i])
-      }
-      fmt.println("")
+    if len(a) <= 1 do continue
+
+    for i in a {
+      fmt.printf("%s ", words[i])
     }
+    fmt.println("")
   }
 }
 
