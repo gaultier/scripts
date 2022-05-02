@@ -24,7 +24,7 @@ print_anagrams :: proc(words: []string) {
 
     num := word_to_num(w)
     if !(num in anagrams) {
-      anagrams[num] = make([dynamic]Word_Idx, 0, 7)
+      anagrams[num] = make([dynamic]Word_Idx, 0, 9)
     }
     append(&anagrams[num], Word_Idx(i))
   }
@@ -34,7 +34,7 @@ print_anagrams :: proc(words: []string) {
       for i in a {
         fmt.printf("%s ", words[i])
       }
-        fmt.println("")
+      fmt.println("")
     }
   }
 }
