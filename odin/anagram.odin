@@ -9,7 +9,7 @@ ascii_word_to_num :: proc(word: string) -> u64 {
   //                a   b c   d e    f  g    h  i    j  k    l  m    n  o    p  q    r  s    t  u    v  w    x  y    z
   primes := [26]u64{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101}
   res := u64(1)
-  for c, i in word {
+  for c in word {
     res *= primes[u64(c) - u64('a')]
   }
 
@@ -23,9 +23,8 @@ collect_anagrams :: proc(words: []string) -> (map[u64][dynamic]Word_Idx) {
     if !is_ascii(w) do continue
 
     num := ascii_word_to_num(w)
-    if !(num in anagrams) {
-      anagrams[num] = make([dynamic]Word_Idx, 0, 9)
-    }
+    if !(num in anagrams) do anagrams[num] = make([dynamic]Word_Idx, 0, 9)
+
     append(&anagrams[num], Word_Idx(i))
   }
 
@@ -35,12 +34,10 @@ collect_anagrams :: proc(words: []string) -> (map[u64][dynamic]Word_Idx) {
 print_anagrams :: proc(words: []string) {
   anagrams := collect_anagrams(words)
 
-  for k, a in anagrams {
+  for _, a in anagrams {
     if len(a) <= 1 do continue
 
-    for i in a {
-      fmt.printf("%s ", words[i])
-    }
+    for i in a do fmt.printf("%s ", words[i])
     fmt.println("")
   }
 }
@@ -48,9 +45,8 @@ print_anagrams :: proc(words: []string) {
 is_ascii :: proc(word: string) -> bool {
   for c in word {
     switch c {
-      case 'a'..'z':
-      case:
-        return false
+      case 'a'..'z': // no-op
+      case: return false
     }
   }
   return true
