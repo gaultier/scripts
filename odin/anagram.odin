@@ -1,6 +1,7 @@
 package main
 
 import "core:fmt"
+import "core:mem"
 import "core:testing"
 import "core:os"
 import "core:strings"
@@ -61,12 +62,19 @@ slurp_words_from_file :: proc(path: string) -> (words: []string, success: bool) 
 }
 
 main :: proc() {
+  arena : mem.Arena
+  memory := make([]byte, 100_000_000)
+  mem.init_arena(&arena, memory)
+  context.allocator = mem.arena_allocator(&arena)
+
   words, ok := slurp_words_from_file("/usr/share/dict/words")
   if !ok {
     os.write_string(os.stderr, "Failed to read from file")
     os.exit(1)
   }
   print_anagrams(words)
+
+  fmt.printf("arena=%d %d", arena.offset, arena.peak_used) 
 }
 
 @test
