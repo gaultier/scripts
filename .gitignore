@@ -2,3 +2,5 @@
 .cpcache
 *.bin
 *.dSYM
+.DS_Store
+*.svg

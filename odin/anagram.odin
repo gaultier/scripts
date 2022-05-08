@@ -17,7 +17,6 @@ ascii_word_to_num :: proc(word: string) -> u64 {
   return res
 }
 
-Word_Idx :: distinct u32
 collect_anagrams :: proc(words: []string) -> (map[u64][dynamic]Word_Idx) {
   anagrams := make(map[u64][dynamic]Word_Idx, 12_000)
   for w, i in words {
