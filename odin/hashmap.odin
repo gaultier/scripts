@@ -20,6 +20,9 @@ hashmap_make :: proc (capacity: u64) -> HashMap {
 }
 
 hashmap_find_entry :: proc(hashmap: ^HashMap, word: string) -> u64 {
+  assert(cap(hashmap.keys) == cap(hashmap.values))
+  assert(len(hashmap.keys) == len(hashmap.values))
+
   capacity := u64(cap(hashmap.keys))
   hash := ascii_word_to_num(word)
   
@@ -32,11 +35,16 @@ hashmap_find_entry :: proc(hashmap: ^HashMap, word: string) -> u64 {
 }
 
 hashmap_add :: proc (hashmap: ^HashMap, word: string, word_idx: Word_Idx) {
+  assert(cap(hashmap.keys) == cap(hashmap.values))
+  assert(len(hashmap.keys) == len(hashmap.values))
+
   i := hashmap_find_entry(hashmap, word)
   hash := ascii_word_to_num(word)
   hashmap.keys[i] = hash
   small_array.append(&hashmap.values[i], word_idx)
 
+  assert(cap(hashmap.keys) == cap(hashmap.values))
+  assert(len(hashmap.keys) == len(hashmap.values))
 }
 
 @test
