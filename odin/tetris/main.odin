@@ -1,7 +1,7 @@
 package tetris 
 import "core:fmt"
 import "core:os"
-import SDL    "vendor:sdl2"
+import SDL "vendor:sdl2"
 
 init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
   if SDL.Init(SDL.INIT_VIDEO) < 0 {
