@@ -8,10 +8,10 @@ import "core:strings"
 
 ascii_word_to_num :: proc(word: string) -> u64 {
   //                a   b c   d e    f  g    h  i    j  k    l  m    n  o    p  q    r  s    t  u    v  w    x  y    z
-  primes := [26]u64{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101}
+  primes := [26]u8{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101}
   res := u64(1)
   for c in word {
-    res *= primes[u64(c) - u64('a')]
+    res *= u64(primes[c - 'a'])
   }
 
   return res
