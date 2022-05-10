@@ -36,8 +36,16 @@ main :: proc () {
   for {
     e : SDL.Event
     SDL.WaitEvent(&e)
-    if e.type == SDL.EventType.QUIT {
-      return
+    if e.type == SDL.EventType.QUIT do return
+    if e.type == SDL.EventType.KEYDOWN {
+      #partial switch e.key.keysym.sym {
+        case .ESCAPE: return
+      }
     }
+
+
+    SDL.RenderClear(renderer)
+    // TODO render
+    SDL.RenderPresent(renderer)
   }
 }
