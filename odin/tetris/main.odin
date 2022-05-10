@@ -43,6 +43,7 @@ main :: proc () {
       }
     }
 
+    // TODO gameplay
 
     SDL.RenderClear(renderer)
     // TODO render
