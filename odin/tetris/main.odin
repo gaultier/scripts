@@ -13,7 +13,7 @@ init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
   screen_height : i32 = 768
   window := SDL.CreateWindow("Tetris", SDL.WINDOWPOS_UNDEFINED,
                                           SDL.WINDOWPOS_UNDEFINED, screen_width,
-                                          screen_height, SDL.WindowFlags{.SHOWN, .RESIZABLE});
+                                          screen_height, SDL.WindowFlags{.SHOWN, .RESIZABLE})
   if window == nil {
     fmt.eprintf("Failed to create window: %v", SDL.GetError())
     os.exit(1)
