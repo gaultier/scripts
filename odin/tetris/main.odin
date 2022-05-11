@@ -36,6 +36,7 @@ main :: proc () {
   surface := SDL.CreateRGBSurface(0, 20, 20, 32, 0, 0, 0, 0)
   SDL.FillRect(surface, nil, SDL.MapRGB(surface.format, 255, 0, 0))
   texture := SDL.CreateTextureFromSurface(renderer, surface)
+  SDL.FreeSurface(surface)
 
   for {
     e : SDL.Event
