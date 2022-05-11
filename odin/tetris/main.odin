@@ -33,6 +33,10 @@ init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
 main :: proc () {
   window, renderer := init()
 
+  surface := SDL.CreateRGBSurface(0, 20, 20, 32, 0, 0, 0, 0)
+  SDL.FillRect(surface, nil, SDL.MapRGB(surface.format, 255, 0, 0))
+  texture := SDL.CreateTextureFromSurface(renderer, surface)
+
   for {
     e : SDL.Event
     SDL.WaitEvent(&e)
@@ -46,7 +50,9 @@ main :: proc () {
     // TODO gameplay
 
     SDL.RenderClear(renderer)
-    // TODO render
+
+    SDL.RenderCopy(renderer, texture, nil, nil)
+
     SDL.RenderPresent(renderer)
   }
 }
