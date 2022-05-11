@@ -7,6 +7,10 @@ block_size :: 20
 window_width : i32 : 1024
 window_height : i32 : 768
 
+block_O := [3][3]u8{{0, 0, 0},
+                    {0, 1, 1},
+                    {0, 1, 1}}
+
 init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
   if SDL.Init(SDL.INIT_VIDEO) < 0 {
     fmt.eprintf("Failed to init sdl: %v", SDL.GetError())
@@ -66,6 +70,9 @@ main :: proc () {
       w = block_size,
       h = block_size,
     }
+    SDL.RenderCopy(renderer, block_texture, nil, &dst)
+    dst.x += block_size
+    dst.y += block_size
     SDL.RenderCopy(renderer, block_texture, nil, &dst)
 
     SDL.RenderPresent(renderer)
