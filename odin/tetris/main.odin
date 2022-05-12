@@ -4,8 +4,8 @@ import "core:os"
 import SDL "vendor:sdl2"
 
 block_size :: 20
-window_width : i32 : 1024
-window_height : i32 : 768
+window_width : i32 : 800
+window_height : i32 : 600
 
 Piece :: struct {
   shape: Shape,
@@ -13,14 +13,6 @@ Piece :: struct {
 }
 
 Shape :: [3][3]u8
-
-O_shape := Shape{{0, 0, 0},
-                 {0, 1, 1},
-                 {0, 1, 1}}
-
-L_shape := Shape{{1, 0, 0},
-                 {1, 0, 0},
-                 {1, 1, 0}}
 
 init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
   if SDL.Init(SDL.INIT_VIDEO) < 0 {
@@ -70,10 +62,23 @@ render_piece :: proc (renderer: ^SDL.Renderer, piece: Piece, texture: ^SDL.Textu
   }
 }
 
+update_piece_dimensions :: proc () {}
+
 main :: proc () {
   window, renderer := init()
 
   block_texture := make_block_texture(renderer)
+
+  O_shape := Shape{{0, 0, 0},
+                   {0, 1, 1},
+                   {0, 1, 1}}
+
+  L_shape := Shape{{1, 0, 0},
+                   {1, 0, 0},
+                   {1, 1, 0}}
+  I_shape := Shape{{1, 0, 0},
+                   {1, 0, 0},
+                   {1, 0, 0}}
 
   O_piece := Piece {
     shape = O_shape,
@@ -89,6 +94,15 @@ main :: proc () {
     w = block_size*2,
     h = block_size*3,
   }
+  I_piece := Piece {
+    shape = I_shape,
+    x =  block_size*3,
+    y =  block_size*3,
+    w = block_size*1,
+    h = block_size*3,
+  }
+
+  pieces := []Piece{O_piece, L_piece, I_piece}
 
   for {
     e : SDL.Event
@@ -106,8 +120,9 @@ main :: proc () {
     SDL.RenderClear(renderer)
 
 
-    render_piece(renderer, O_piece, block_texture)
-    render_piece(renderer, L_piece, block_texture)
+    for piece in pieces {
+      render_piece(renderer, piece, block_texture)
+    }
 
     SDL.RenderPresent(renderer)
   }
