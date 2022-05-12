@@ -7,9 +7,20 @@ block_size :: 20
 window_width : i32 : 1024
 window_height : i32 : 768
 
-block_O := [3][3]u8{{0, 0, 0},
-                    {0, 1, 1},
-                    {0, 1, 1}}
+Piece :: struct {
+  shape: Shape,
+  x, y, w, h: i32,
+}
+
+Shape :: [3][3]u8
+
+O_shape := Shape{{0, 0, 0},
+                 {0, 1, 1},
+                 {0, 1, 1}}
+
+L_shape := Shape{{1, 0, 0},
+                 {1, 0, 0},
+                 {1, 1, 0}}
 
 init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
   if SDL.Init(SDL.INIT_VIDEO) < 0 {
@@ -38,11 +49,25 @@ init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
 
 make_block_texture :: proc (renderer: ^SDL.Renderer) -> ^SDL.Texture {
   surface := SDL.CreateRGBSurface(0, block_size, block_size, 32, 0, 0, 0, 0)
-  SDL.FillRect(surface, nil, SDL.MapRGB(surface.format, 255, 0, 0))
+  SDL.FillRect(surface, nil, SDL.MapRGB(surface.format, 255, 255, 0))
   texture := SDL.CreateTextureFromSurface(renderer, surface)
   SDL.FreeSurface(surface)
 
   return texture
+}
+
+render_piece :: proc (renderer: ^SDL.Renderer, piece: Piece, texture: ^SDL.Texture) {
+  rect := SDL.Rect{x=i32(piece.x), y=i32(piece.y), w=block_size, h=block_size} 
+
+  for yrow, yi in piece.shape {
+    for cell, xi in yrow {
+      if cell == 0 do continue
+
+      rect.x = i32(piece.x) + i32(xi) * block_size 
+      rect.y = i32(piece.y) + i32(yi) * block_size 
+      SDL.RenderCopy(renderer, texture, nil, &rect)
+    }
+  }
 }
 
 main :: proc () {
@@ -50,10 +75,26 @@ main :: proc () {
 
   block_texture := make_block_texture(renderer)
 
+  O_piece := Piece {
+    shape = O_shape,
+    x = (window_width - block_size) / 2,
+    y = (window_height - block_size) / 2,
+    w = block_size*2,
+    h = block_size*2,
+  }
+  L_piece := Piece {
+    shape = L_shape,
+    x =  block_size,
+    y =  block_size,
+    w = block_size*2,
+    h = block_size*3,
+  }
+
   for {
     e : SDL.Event
     SDL.WaitEvent(&e)
     if e.type == SDL.EventType.QUIT do return
+    if e.type == SDL.EventType.APP_TERMINATING do return
     if e.type == SDL.EventType.KEYDOWN {
       #partial switch e.key.keysym.sym {
         case .ESCAPE: return
@@ -64,16 +105,9 @@ main :: proc () {
 
     SDL.RenderClear(renderer)
 
-    dst := SDL.Rect{
-      x = (window_width - block_size) / 2,
-      y = (window_height - block_size) / 2,
-      w = block_size,
-      h = block_size,
-    }
-    SDL.RenderCopy(renderer, block_texture, nil, &dst)
-    dst.x += block_size
-    dst.y += block_size
-    SDL.RenderCopy(renderer, block_texture, nil, &dst)
+
+    render_piece(renderer, O_piece, block_texture)
+    render_piece(renderer, L_piece, block_texture)
 
     SDL.RenderPresent(renderer)
   }
