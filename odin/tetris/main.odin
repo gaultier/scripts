@@ -40,69 +40,68 @@ init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
 }
 
 make_block_texture :: proc (renderer: ^SDL.Renderer) -> ^SDL.Texture {
-  surface := SDL.CreateRGBSurface(0, block_size, block_size, 32, 0, 0, 0, 0)
-  SDL.FillRect(surface, nil, SDL.MapRGB(surface.format, 255, 255, 0))
-  texture := SDL.CreateTextureFromSurface(renderer, surface)
-  SDL.FreeSurface(surface)
+  texture := SDL.CreateTexture(renderer,u32(SDL.PixelFormatEnum.RGBA8888), SDL.TextureAccess.TARGET, window_width, window_height)
 
   return texture
 }
 
 render_piece :: proc (renderer: ^SDL.Renderer, piece: Piece, texture: ^SDL.Texture) {
-  rect := SDL.Rect{x=i32(piece.x), y=i32(piece.y), w=block_size, h=block_size} 
-
   for yrow, yi in piece.shape {
     for cell, xi in yrow {
       if cell == 0 do continue
 
-      rect.x = i32(piece.x) + i32(xi) * block_size 
-      rect.y = i32(piece.y) + i32(yi) * block_size 
-      SDL.RenderCopy(renderer, texture, nil, &rect)
+      r := SDL.Rect{
+        x=i32(piece.x) + i32(xi) * block_size,
+        y=i32(piece.y) + i32(yi) * block_size,
+        w=block_size,
+        h=block_size,
+      } 
+
+      SDL.RenderDrawRect(renderer, &r)
+      SDL.SetRenderDrawColor(renderer, 0xff, 0, 0, 0)
+      SDL.RenderFillRect(renderer, &r)
     }
   }
 }
 
-update_piece_dimensions :: proc () {}
-
-main :: proc () {
-  window, renderer := init()
-
-  block_texture := make_block_texture(renderer)
-
-  O_shape := Shape{{0, 0, 0},
-                   {0, 1, 1},
-                   {0, 1, 1}}
-
-  L_shape := Shape{{1, 0, 0},
-                   {1, 0, 0},
-                   {1, 1, 0}}
-  I_shape := Shape{{1, 0, 0},
-                   {1, 0, 0},
-                   {1, 0, 0}}
-
+make_pieces :: proc () -> []Piece {
   O_piece := Piece {
-    shape = O_shape,
+    shape = {{1, 1, 0},
+             {1, 1, 0},
+             {0, 0, 0}},
     x = (window_width - block_size) / 2,
     y = (window_height - block_size) / 2,
     w = block_size*2,
     h = block_size*2,
   }
   L_piece := Piece {
-    shape = L_shape,
+    shape = {{1, 0, 0},
+             {1, 0, 0},
+             {1, 1, 0}},
     x =  block_size,
     y =  block_size,
     w = block_size*2,
     h = block_size*3,
   }
   I_piece := Piece {
-    shape = I_shape,
+    shape = {{1, 0, 0},
+             {1, 0, 0},
+             {1, 0, 0}},
     x =  block_size*3,
     y =  block_size*3,
     w = block_size*1,
     h = block_size*3,
   }
 
-  pieces := []Piece{O_piece, L_piece, I_piece}
+  return []Piece{O_piece, L_piece, I_piece}
+}
+
+main :: proc () {
+  window, renderer := init()
+
+  block_texture := make_block_texture(renderer)
+
+  pieces := make_pieces()
 
   for {
     e : SDL.Event
@@ -117,12 +116,16 @@ main :: proc () {
 
     // TODO gameplay
 
+    SDL.SetRenderTarget(renderer, block_texture)
+    SDL.SetRenderDrawColor(renderer, 0, 0, 0, 0)
     SDL.RenderClear(renderer)
-
 
     for piece in pieces {
       render_piece(renderer, piece, block_texture)
     }
+
+    SDL.SetRenderTarget(renderer, nil)
+    SDL.RenderCopy(renderer, block_texture, nil, nil)
 
     SDL.RenderPresent(renderer)
   }
