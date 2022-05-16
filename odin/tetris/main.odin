@@ -64,15 +64,26 @@ render_piece :: proc (renderer: ^SDL.Renderer, piece: Piece, texture: ^SDL.Textu
 
 update_piece_dimensions :: proc () {}
 
-rotate :: proc (using piece: ^Piece) {
+rotate_right :: proc (using piece: ^Piece) {
+            // x=0 y=0 -> y=2 x=0
+            // x=0 y=1 -> x=1 y=2
+            // x=0 y=2 -> x=2 y=2
+            // x=1 y=2 -> x=2 y=1
+            // first column -> last row
+            // second column -> second row
+            // last column -> first row
   w, h = h, w
   s : Shape
 
-  for yrow, yi in shape {
-    for _, xi in yrow {
-      s[xi][yi] = shape[yi][xi]
-    }
-  }
+  s[0][0] = shape[0][2]
+  s[0][1] = shape[1][2]
+  s[0][2] = shape[2][2]
+  s[1][0] = shape[0][1]
+  //s[1][1] = shape[1][1]
+  s[1][2] = shape[2][1]
+  s[2][0] = shape[0][0]
+  s[2][1] = shape[1][0]
+  s[2][2] = shape[2][0]
   shape = s
 }
 
@@ -94,6 +105,7 @@ main :: proc () {
     shape ={{1, 0, 0},
             {1, 0, 0},
             {1, 1, 0}},
+            
     x =  block_size,
     y =  block_size,
     w = block_size*2,
@@ -119,6 +131,10 @@ main :: proc () {
     if e.type == SDL.EventType.KEYDOWN {
       #partial switch e.key.keysym.sym {
         case .ESCAPE: return
+        case .RIGHT, .LEFT:
+          for _, i in pieces {
+            rotate_right(&pieces[i])
+          }
       }
     }
 
@@ -128,7 +144,6 @@ main :: proc () {
 
 
     for _, i in pieces {
-      rotate(&pieces[i])
       render_piece(renderer, pieces[i], block_texture)
     }
 
