@@ -69,18 +69,19 @@ render_piece :: proc (renderer: ^SDL.Renderer, piece: Piece, texture: ^SDL.Textu
 
 update_piece_dimensions :: proc () {}
 
-rotate_left :: proc (using piece: ^Piece) {
-  rotate_right(piece)
-  rotate_right(piece)
-  rotate_right(piece)
+rotate_left :: proc (game_state: ^GameState) {
+  rotate_right(game_state)
+  rotate_right(game_state)
+  rotate_right(game_state)
 }
 
-rotate_right :: proc (using piece: ^Piece) {
+rotate_right :: proc (using game_state: ^GameState) {
   /*
   x . .     . . .
   x . .  => . . x
   x x .     x x x
   */
+  using playing_piece
   w, h = h, w
   s : Shape
 
@@ -144,20 +145,27 @@ handle_inputs :: proc(game_state: ^GameState) {
     if e.type == SDL.EventType.KEYDOWN {
       #partial switch e.key.keysym.sym {
         case .ESCAPE: SDL.Quit()
-        case .LEFT:
-            rotate_left(&game_state.playing_piece)
-        case .RIGHT:
-            rotate_right(&game_state.playing_piece)
-        case .DOWN:
-            go_down(game_state)
+        case .LEFT: go_left(game_state)
+        case .RIGHT: go_right(game_state)
+        case .A: rotate_left(game_state)
+        case .B: rotate_right(game_state)
+        case .DOWN: go_down(game_state)
       }
     }
   }
-  SDL.Delay(17) // FIXME
+  SDL.Delay(17) // FIXME track dt
 }
 
 go_down :: proc (game_state: ^GameState) {
-  game_state.playing_piece.y += /* FIXME */ 10
+  game_state.playing_piece.y += /* FIXME */ block_size
+}
+
+go_left :: proc (game_state: ^GameState) {
+  game_state.playing_piece.x -= /* FIXME */ block_size
+}
+
+go_right :: proc (game_state: ^GameState) {
+  game_state.playing_piece.x += /* FIXME */ block_size
 }
 
 main :: proc () {
