@@ -157,7 +157,7 @@ handle_inputs :: proc(game_state: ^GameState) {
 }
 
 go_down :: proc (game_state: ^GameState) {
-  game_state.playing_piece.y += /* FIXME */ 1
+  game_state.playing_piece.y += /* FIXME */ 10
 }
 
 main :: proc () {
