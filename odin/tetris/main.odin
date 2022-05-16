@@ -69,33 +69,28 @@ main :: proc () {
 
   block_texture := make_block_texture(renderer)
 
-  O_shape := Shape{{0, 0, 0},
-                   {0, 1, 1},
-                   {0, 1, 1}}
-
-  L_shape := Shape{{1, 0, 0},
-                   {1, 0, 0},
-                   {1, 1, 0}}
-  I_shape := Shape{{1, 0, 0},
-                   {1, 0, 0},
-                   {1, 0, 0}}
-
   O_piece := Piece {
-    shape = O_shape,
+    shape ={{1, 1, 0},
+            {1, 1, 0},
+            {0, 0, 0}},
     x = (window_width - block_size) / 2,
     y = (window_height - block_size) / 2,
     w = block_size*2,
     h = block_size*2,
   }
   L_piece := Piece {
-    shape = L_shape,
+    shape ={{1, 0, 0},
+            {1, 0, 0},
+            {1, 1, 0}},
     x =  block_size,
     y =  block_size,
     w = block_size*2,
     h = block_size*3,
   }
   I_piece := Piece {
-    shape = I_shape,
+    shape = {{1, 0, 0},
+             {1, 0, 0},
+             {1, 0, 0}},
     x =  block_size*3,
     y =  block_size*3,
     w = block_size*1,
