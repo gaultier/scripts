@@ -64,6 +64,18 @@ render_piece :: proc (renderer: ^SDL.Renderer, piece: Piece, texture: ^SDL.Textu
 
 update_piece_dimensions :: proc () {}
 
+rotate :: proc (using piece: ^Piece) {
+  w, h = h, w
+  s : Shape
+
+  for yrow, yi in shape {
+    for _, xi in yrow {
+      s[xi][yi] = shape[yi][xi]
+    }
+  }
+  shape = s
+}
+
 main :: proc () {
   window, renderer := init()
 
@@ -91,8 +103,8 @@ main :: proc () {
     shape = {{1, 0, 0},
              {1, 0, 0},
              {1, 0, 0}},
-    x =  block_size*3,
-    y =  block_size*3,
+    x =  block_size*5,
+    y =  block_size*5,
     w = block_size*1,
     h = block_size*3,
   }
@@ -115,8 +127,9 @@ main :: proc () {
     SDL.RenderClear(renderer)
 
 
-    for piece in pieces {
-      render_piece(renderer, piece, block_texture)
+    for _, i in pieces {
+      rotate(&pieces[i])
+      render_piece(renderer, pieces[i], block_texture)
     }
 
     SDL.RenderPresent(renderer)
