@@ -64,25 +64,69 @@ render_piece :: proc (renderer: ^SDL.Renderer, piece: Piece, texture: ^SDL.Textu
 
 update_piece_dimensions :: proc () {}
 
+rotate_left :: proc (using piece: ^Piece) {
+  rotate_right(piece)
+  rotate_right(piece)
+  rotate_right(piece)
+}
+
 rotate_right :: proc (using piece: ^Piece) {
-            // x=0 y=0 -> y=2 x=0
-            // x=0 y=1 -> x=1 y=2
-            // x=0 y=2 -> x=2 y=2
-            // x=1 y=2 -> x=2 y=1
-            // first column -> last row
-            // second column -> second row
-            // last column -> first row
+  /*
+  x . .     . . .
+  x . .  => . . x
+  x x .     x x x
+  */
   w, h = h, w
   s : Shape
 
+  /*
+  x . O     O . .
+  x . .  => . . x
+  x x .     x x x
+  */
   s[0][0] = shape[0][2]
+  /*
+  x . .     . O .
+  x . O  => . . x
+  x x .     x x x
+  */
   s[0][1] = shape[1][2]
+  /*
+  x . .     . . O
+  x . .  => . . x
+  x x O     x x x
+  */
   s[0][2] = shape[2][2]
+  /*
+  x O .     . . .
+  x . .  => O . x
+  x x .     x x x
+  */
   s[1][0] = shape[0][1]
-  //s[1][1] = shape[1][1]
+  s[1][1] = shape[1][1]
+  /*
+  x . .     . . .
+  x . .  => . . O
+  x O .     x x x
+  */
   s[1][2] = shape[2][1]
+  /*
+  O . .     . . .
+  x . .  => . . x
+  x x .     O x x
+  */
   s[2][0] = shape[0][0]
+  /*
+  x . .     . . .
+  O . .  => . . x
+  x x .     x O x
+  */
   s[2][1] = shape[1][0]
+  /*
+  x . .     . . .
+  x . .  => . . x
+  O x .     x x O
+  */
   s[2][2] = shape[2][0]
   shape = s
 }
@@ -131,7 +175,11 @@ main :: proc () {
     if e.type == SDL.EventType.KEYDOWN {
       #partial switch e.key.keysym.sym {
         case .ESCAPE: return
-        case .RIGHT, .LEFT:
+        case .LEFT:
+          for _, i in pieces {
+            rotate_left(&pieces[i])
+          }
+        case .RIGHT:
           for _, i in pieces {
             rotate_right(&pieces[i])
           }
