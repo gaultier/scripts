@@ -14,6 +14,11 @@ Piece :: struct {
 
 Shape :: [3][3]u8
 
+GameState :: struct {
+  locked_pieces: []Piece,
+  playing_piece: Piece,
+}
+
 init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
   if SDL.Init(SDL.INIT_VIDEO) < 0 {
     fmt.eprintf("Failed to init sdl: %v", SDL.GetError())
@@ -131,8 +136,28 @@ rotate_right :: proc (using piece: ^Piece) {
   shape = s
 }
 
-go_down :: proc (using piece: ^Piece) {
-  y += /* FIXME */ 1
+handle_inputs :: proc(game_state: ^GameState) {
+  e : SDL.Event
+  for SDL.PollEvent(&e) > 0 {
+    if e.type == SDL.EventType.QUIT do SDL.Quit()
+    if e.type == SDL.EventType.APP_TERMINATING do return
+    if e.type == SDL.EventType.KEYDOWN {
+      #partial switch e.key.keysym.sym {
+        case .ESCAPE: SDL.Quit()
+        case .LEFT:
+            rotate_left(&game_state.playing_piece)
+        case .RIGHT:
+            rotate_right(&game_state.playing_piece)
+        case .DOWN:
+            go_down(game_state)
+      }
+    }
+  }
+  SDL.Delay(17) // FIXME
+}
+
+go_down :: proc (game_state: ^GameState) {
+  game_state.playing_piece.y += /* FIXME */ 1
 }
 
 main :: proc () {
@@ -169,39 +194,20 @@ main :: proc () {
     h = block_size*3,
   }
 
-  pieces := []Piece{O_piece, L_piece, I_piece}
+  game_state := GameState {
+    locked_pieces = []Piece{O_piece,  I_piece},
+    playing_piece = L_piece,
+  }
 
   for {
-    e : SDL.Event
-    SDL.WaitEvent(&e)
-    if e.type == SDL.EventType.QUIT do return
-    if e.type == SDL.EventType.APP_TERMINATING do return
-    if e.type == SDL.EventType.KEYDOWN {
-      #partial switch e.key.keysym.sym {
-        case .ESCAPE: return
-        case .LEFT:
-          for _, i in pieces {
-            rotate_left(&pieces[i])
-          }
-        case .RIGHT:
-          for _, i in pieces {
-            rotate_right(&pieces[i])
-          }
-        case .DOWN:
-          for _, i in pieces {
-            go_down(&pieces[i])
-          }
-      }
-    }
-
-    // TODO gameplay
+    handle_inputs(&game_state)
 
     SDL.RenderClear(renderer)
 
-
-    for _, i in pieces {
-      render_piece(renderer, pieces[i], block_texture)
+    for piece in game_state.locked_pieces {
+      render_piece(renderer, piece, block_texture)
     }
+    render_piece(renderer, game_state.playing_piece, block_texture)
 
     SDL.RenderPresent(renderer)
   }
