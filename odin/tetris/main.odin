@@ -69,13 +69,13 @@ render_piece :: proc (renderer: ^SDL.Renderer, piece: Piece, texture: ^SDL.Textu
 
 update_piece_dimensions :: proc () {}
 
-rotate_left :: proc (game_state: ^GameState) {
-  rotate_right(game_state)
-  rotate_right(game_state)
-  rotate_right(game_state)
+rotate_counter_clockwise :: proc (game_state: ^GameState) {
+  rotate_clockwise(game_state)
+  rotate_clockwise(game_state)
+  rotate_clockwise(game_state)
 }
 
-rotate_right :: proc (using game_state: ^GameState) {
+rotate_clockwise :: proc (using game_state: ^GameState) {
   /*
   x . .     . . .
   x . .  => . . x
@@ -147,8 +147,8 @@ handle_inputs :: proc(game_state: ^GameState) {
         case .ESCAPE: SDL.Quit()
         case .LEFT: go_left(game_state)
         case .RIGHT: go_right(game_state)
-        case .A: rotate_left(game_state)
-        case .B: rotate_right(game_state)
+        case .UP: rotate_counter_clockwise(game_state)
+        case .X: rotate_clockwise(game_state)
         case .DOWN: go_down(game_state)
       }
     }
