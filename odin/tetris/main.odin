@@ -131,6 +131,10 @@ rotate_right :: proc (using piece: ^Piece) {
   shape = s
 }
 
+go_down :: proc (using piece: ^Piece) {
+  y += /* FIXME */ 1
+}
+
 main :: proc () {
   window, renderer := init()
 
@@ -182,6 +186,10 @@ main :: proc () {
         case .RIGHT:
           for _, i in pieces {
             rotate_right(&pieces[i])
+          }
+        case .DOWN:
+          for _, i in pieces {
+            go_down(&pieces[i])
           }
       }
     }
