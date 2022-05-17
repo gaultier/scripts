@@ -1,11 +1,14 @@
 package tetris 
 import "core:fmt"
+import "core:mem"
 import "core:os"
 import SDL "vendor:sdl2"
 
 block_size :: 20
 window_width : i32 : 800
 window_height : i32 : 600
+
+arena : mem.Arena
 
 Piece :: struct {
   shape: Shape,
@@ -14,9 +17,17 @@ Piece :: struct {
 
 Shape :: [3][3]u8
 
+PieceIdx :: u8
 GameState :: struct {
-  locked_pieces: []Piece,
-  playing_piece: Piece,
+  pieces: [dynamic]Piece,
+  locked_pieces: [dynamic]PieceIdx,
+  playing_piece: PieceIdx,
+}
+
+get_piece :: proc (using game_state: ^GameState, piece_idx: PieceIdx) -> ^Piece {
+  if piece_idx < 0 || int(piece_idx) >= len(pieces) do return nil
+
+  return &pieces[piece_idx]
 }
 
 init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
@@ -42,6 +53,11 @@ init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
   SDL.SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff)
 
   return window, renderer
+}
+
+exit :: proc () {
+  fmt.eprintf("arena=%d %d", arena.offset, arena.peak_used) 
+  SDL.Quit()
 }
 
 make_block_texture :: proc (renderer: ^SDL.Renderer) -> ^SDL.Texture {
@@ -75,12 +91,14 @@ rotate_counter_clockwise :: proc (game_state: ^GameState) {
   rotate_clockwise(game_state)
 }
 
-rotate_clockwise :: proc (using game_state: ^GameState) {
+rotate_clockwise :: proc (game_state: ^GameState) {
   /*
   x . .     . . .
   x . .  => . . x
   x x .     x x x
   */
+  playing_piece := get_piece(game_state, game_state.playing_piece)
+  assert(playing_piece != nil)
   using playing_piece
   w, h = h, w
   s : Shape
@@ -140,11 +158,11 @@ rotate_clockwise :: proc (using game_state: ^GameState) {
 handle_inputs :: proc(game_state: ^GameState) {
   e : SDL.Event
   for SDL.PollEvent(&e) > 0 {
-    if e.type == SDL.EventType.QUIT do SDL.Quit()
+    if e.type == SDL.EventType.QUIT do exit()
     if e.type == SDL.EventType.APP_TERMINATING do return
     if e.type == SDL.EventType.KEYDOWN {
       #partial switch e.key.keysym.sym {
-        case .ESCAPE: SDL.Quit()
+        case .ESCAPE: exit()
         case .LEFT: go_left(game_state)
         case .RIGHT: go_right(game_state)
         case .UP: rotate_counter_clockwise(game_state)
@@ -157,18 +175,28 @@ handle_inputs :: proc(game_state: ^GameState) {
 }
 
 go_down :: proc (game_state: ^GameState) {
-  game_state.playing_piece.y += /* FIXME */ block_size
+  playing_piece := get_piece(game_state, game_state.playing_piece)
+  assert(playing_piece != nil)
+  playing_piece.y += /* FIXME */ block_size
 }
 
 go_left :: proc (game_state: ^GameState) {
-  game_state.playing_piece.x -= /* FIXME */ block_size
+  playing_piece := get_piece(game_state, game_state.playing_piece)
+  assert(playing_piece != nil)
+  playing_piece.x -= /* FIXME */ block_size
 }
 
 go_right :: proc (game_state: ^GameState) {
-  game_state.playing_piece.x += /* FIXME */ block_size
+  playing_piece := get_piece(game_state, game_state.playing_piece)
+  assert(playing_piece != nil)
+  playing_piece.x += /* FIXME */ block_size
 }
 
 main :: proc () {
+  memory := make([]byte, 20_000)
+  mem.init_arena(&arena, memory)
+  context.allocator = mem.arena_allocator(&arena)
+
   window, renderer := init()
 
   block_texture := make_block_texture(renderer)
@@ -202,9 +230,16 @@ main :: proc () {
     h = block_size*3,
   }
 
+  pieces := make([dynamic]Piece, 0, 100)
+  append(&pieces, O_piece, I_piece, L_piece)
+
+  locked_pieces := make([dynamic]PieceIdx, 0,100)
+  append(&locked_pieces, 0, 1)
+
   game_state := GameState {
-    locked_pieces = []Piece{O_piece,  I_piece},
-    playing_piece = L_piece,
+    pieces = pieces,
+    locked_pieces = locked_pieces,
+    playing_piece = 2,
   }
 
   for {
@@ -212,10 +247,15 @@ main :: proc () {
 
     SDL.RenderClear(renderer)
 
-    for piece in game_state.locked_pieces {
-      render_piece(renderer, piece, block_texture)
+    for piece_idx in game_state.locked_pieces {
+      piece := get_piece(&game_state, piece_idx)
+      assert(piece != nil)
+      render_piece(renderer, piece^, block_texture)
     }
-    render_piece(renderer, game_state.playing_piece, block_texture)
+
+    playing_piece := get_piece(&game_state, game_state.playing_piece)
+    assert(playing_piece != nil)
+    render_piece(renderer, playing_piece^, block_texture)
 
     SDL.RenderPresent(renderer)
   }
