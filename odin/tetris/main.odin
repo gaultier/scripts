@@ -57,7 +57,7 @@ init :: proc () -> (^SDL.Window, ^SDL.Renderer) {
 
 exit :: proc () {
   fmt.eprintf("arena=%d %d", arena.offset, arena.peak_used) 
-  SDL.Quit()
+  os.exit(0)
 }
 
 make_block_texture :: proc (renderer: ^SDL.Renderer) -> ^SDL.Texture {
@@ -190,6 +190,10 @@ go_right :: proc (game_state: ^GameState) {
   playing_piece := get_piece(game_state, game_state.playing_piece)
   assert(playing_piece != nil)
   playing_piece.x += /* FIXME */ block_size
+}
+
+locked_pieces_disappear :: proc (using game_state: ^GameState) {
+  resize(&locked_pieces, 0)
 }
 
 main :: proc () {
